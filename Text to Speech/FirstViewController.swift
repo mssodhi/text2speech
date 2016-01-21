@@ -11,7 +11,7 @@ import AVFoundation
 
 class FirstViewController: UIViewController, AVSpeechSynthesizerDelegate, UITextViewDelegate{
 
-    @IBOutlet weak var inputField: UITextView!
+    @IBOutlet weak var textView: UITextView!
     @IBOutlet weak var playButton: UIButton!
     @IBOutlet weak var speedSlider : UISlider!
     @IBOutlet weak var stopButton: UIButton!
@@ -26,16 +26,20 @@ class FirstViewController: UIViewController, AVSpeechSynthesizerDelegate, UIText
     }
     
     @IBAction func textToSpeech(sender: AnyObject) {
-        inputText = inputField.text
-        let utterance = AVSpeechUtterance(string: inputText)
-        utterance.rate = speechSpeed
+        inputText = textView.text
         
-        self.synthesizer.speakUtterance(utterance)
-        self.synthesizer.delegate = self
-        
-        if(!inputText.isEmpty){
+        if(!inputText.isEmpty && textView.textColor != UIColor.lightGrayColor()){
             playButton.hidden = true
             stopButton.hidden = false
+            
+            let utterance = AVSpeechUtterance(string: inputText)
+            utterance.rate = speechSpeed
+            
+            self.synthesizer.speakUtterance(utterance)
+            self.synthesizer.delegate = self
+
+        }else{
+            playButton.hidden = false
         }
     }
     
@@ -51,28 +55,36 @@ class FirstViewController: UIViewController, AVSpeechSynthesizerDelegate, UIText
     }
     
     func textViewDidBeginEditing(textView: UITextView) {
-        if inputField.textColor == UIColor.lightGrayColor() {
-            inputField.text = nil
-            inputField.textColor = UIColor.blackColor()
+        if (textView.textColor == UIColor.lightGrayColor()) {
+            textView.text = nil
+            textView.textColor = UIColor.blackColor()
         }
     }
     
     func textViewDidEndEditing(textView: UITextView) {
-        print("empty")
-        if (inputField.text == "" || inputField.text == nil) {
-            inputField.text = "Enter Text"
-            inputField.textColor = UIColor.lightGrayColor()
+        if (textView.text == "" || textView.text == nil) {
+            textView.text = "Enter Text"
+            textView.textColor = UIColor.lightGrayColor()
         }
+    }
+    
+    func textView(textView: UITextView, shouldChangeTextInRange range: NSRange, replacementText text: String) -> Bool {
+        if text == "\n"
+        {
+            textView.resignFirstResponder()
+            return false
+        }
+        return true
     }
     
     override func viewDidLoad() {
         super.viewDidLoad()
         speechSpeed = 0.5
         stopButton.hidden = true
-        inputField.text = "Enter Text"
-        inputField.textColor = UIColor.lightGrayColor()
-        self.inputField.delegate = self
-        inputField.layer.cornerRadius = 10.0
+        textView.text = "Enter Text  "
+        textView.textColor = UIColor.lightGrayColor()
+        textView.delegate = self
+        textView.layer.cornerRadius = 10.0
     }
 
     override func didReceiveMemoryWarning() {
